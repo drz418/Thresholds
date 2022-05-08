@@ -1,0 +1,105 @@
+
+
+// We are using 2 Continuous Rotation Micro Servos (FS90R)
+// Pos 90 = Stop    Pos 180 = Forward     Pos 0 = Backward
+#include <Servo.h>
+
+Servo myservo;
+Servo myservo2; // create servo object to control a servo
+unsigned long startMillis;  //some global variables available anywhere in the program
+unsigned long currentMillis;
+unsigned long turnPeriod = 1000;
+//unsigned long randomPeriod;
+unsigned long myTime;
+unsigned long Direction; 
+
+
+int pos = 0;    // variable to store the servo position
+
+void setup() {
+  Serial.begin(9600);
+  startMillis = millis();  //initial start time
+  
+  myservo.attach(3); 
+  myservo2.attach(2);// attaches the servo on pin 9 to the servo object
+
+}
+
+void loop() {
+ Direction = random (1,5); // choose a number between 1 and 4
+  myTime = random (5,13);
+  Serial.print (myTime);
+  Serial.print ("\t");
+  Serial.println (Direction); 
+  delay(500);
+
+  currentMillis = millis();  //the number of milliseconds since program started)
+  startMillis = currentMillis; // save the start time of the current period
+
+
+  if (Direction == 1) { // Direction 1 continues forward (NORTH)
+    
+    while (currentMillis - startMillis <= myTime*1000) {
+    myservo.write(180);
+    myservo2.write(0);
+    }
+    if (currentMillis - startMillis >= myTime*1000) { //test if period has elapsed
+    startMillis = currentMillis;
+    // IS THIS IF STATMENT NEEDED?
+    }
+  }
+
+  if (Direction == 2) {
+    while (currentMillis - startMillis <= myTime*1000) {
+    myservo.write(0);
+    myservo2.write(180);
+    }
+    if (currentMillis - startMillis >= myTime*1000) { //test if period has elapsed
+    startMillis = currentMillis;
+    // IS THIS IF STATMENT NEEDED?
+   }
+  }
+
+ if (Direction == 3) {
+  while (currentMillis - startMillis <= turnPeriod) {
+    myservo.write(180);
+    }
+    if (currentMillis - startMillis >= turnPeriod) { //test if period has elapsed
+    startMillis = currentMillis;
+    myservo.write(90);
+    // IS THIS IF STATMENT NEEDED?
+    }
+    
+  while (currentMillis - startMillis <= myTime*1000) {
+    myservo.write(180);
+    myservo2.write(0);
+  }
+    if (currentMillis - startMillis >= turnPeriod) { //test if period has elapsed
+    myservo.write(90);
+    myservo2.write(90);
+    startMillis = currentMillis; // IS THIS IF STATMENT NEEDED?
+    }
+ }
+
+      if (Direction == 4) {
+        while (currentMillis - startMillis <= turnPeriod) {
+    myservo.write(0);
+    }
+    if (currentMillis - startMillis >= turnPeriod) { //test if period has elapsed
+    startMillis = currentMillis;
+    myservo.write(90);
+    // IS THIS IF STATMENT NEEDED?
+    }
+    
+  while (currentMillis - startMillis <= myTime*1000) {
+    myservo.write(180);
+    myservo2.write(0);
+  }
+    if (currentMillis - startMillis >= turnPeriod) { //test if period has elapsed
+    myservo.write(90);
+    myservo2.write(90);
+    startMillis = currentMillis; // IS THIS IF STATMENT NEEDED?
+    }
+  }  
+}  
+ 
