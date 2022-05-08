@@ -1,0 +1,177 @@
+// A list of vehicles
+let vehicles = [];
+let b = 12; // boundary variable
+let xB, yB; 
+function setup() {
+
+  createCanvas(640, 360);
+  // We are now making random vehicles and storing them in an array
+  for (let i = 0; i < 50; i++) {
+    vehicles.push(new Vehicle(random(width), random(height)));
+  }
+}
+
+function draw() {
+  background(51);
+
+  for (let v of vehicles) {
+    v.boundaries();
+    v.applyBehaviors(vehicles);
+    v.update();
+  
+    v.display();
+  }
+
+}
+// Vehicle object
+
+class Vehicle {
+  constructor(x, y) {
+    // All the usual stuff
+    this.position = createVector(x, y);
+    this.r = 12;
+    this.maxspeed = 2; // Maximum speed
+    this.maxforce = 0.2; // Maximum steering force
+    this.acceleration = createVector(0, 0);
+    this.velocity = createVector(0, 0);
+    this.seekX;
+    this.seekY;
+  }
+
+  applyBehaviors(vehicles) {
+
+    let separateForce = this.separate(vehicles);
+    let seekForce = this.seek(createVector(this.seekX, this.seekY));
+
+    separateForce.mult(2); // seperate force 
+    
+    if (mouseIsPressed && mouseX < b){
+      seekForce.mult(0.1);
+      this.seekX = -150;
+      this.seekY = random(b, height-b);
+    } else if (mouseIsPressed && mouseX > width-b) {
+      this.seekX = width+50;
+      this.seekY = (random(b, height-b));
+      seekForce.mult(0.1);
+    } else if(mouseIsPressed && mouseY<b){
+      this.seekX = random(b, width);
+      this.seekY=-50;
+      seekForce.mult(0.2);
+    } else if(mouseIsPressed && mouseY > height-b){
+      this.seekX = random(b, width);
+      this.seekY = height+50;
+      seekForce.mult(0.2);
+    }  else {seekForce.mult(0.001);
+  }
+    //seekForce.mult(0.001);
+
+    this.applyForce(separateForce);
+    this.applyForce(seekForce);
+  }
+
+  applyForce(force) {
+    // We could add mass here if we want A = F / M
+    this.acceleration.add(force);
+  }
+
+  // Separation
+  // Method checks for nearby vehicles and steers away
+  separate(vehicles) {
+    let desiredseparation = 15;
+    let sum = createVector();
+    let count = 0;
+    // For every boid in the system, check if it's too close
+    for (let i = 0; i < vehicles.length; i++) {
+      let d = p5.Vector.dist(this.position, vehicles[i].position);
+      // If the distance is greater than 0 and less than an arbitrary amount (0 when you are yourself)
+      if ((d > 0) && (d < desiredseparation)) {
+        // Calculate vector pointing away from neighbor
+        let diff = p5.Vector.sub(this.position, vehicles[i].position);
+        diff.normalize();
+        diff.div(d); // Weight by distance
+        sum.add(diff);
+        count++; // Keep track of how many
+      }
+    }
+    // Average -- divide by how many
+    if (count > 0) {
+      sum.div(count);
+      // Our desired vector is the average scaled to maximum speed
+      sum.normalize();
+      sum.mult(this.maxspeed);
+      // Implement Reynolds: Steering = Desired - Velocity
+      sum.sub(this.velocity);
+      sum.limit(this.maxforce);
+    }
+    return sum;
+  }
+
+  // A method that calculates a steering force towards a target
+  // STEER = DESIRED MINUS VELOCITY
+  seek(target) {
+    let desired = p5.Vector.sub(target, this.position); // A vector pointing from the location to the target
+
+    // Normalize desired and scale to maximum speed
+    desired.normalize();
+    desired.mult(this.maxspeed);
+    // Steering = Desired minus velocity
+    let steer = p5.Vector.sub(desired, this.velocity);
+    steer.limit(this.maxforce); // Limit to maximum steering force
+    return steer;
+  }
+
+  // Method to update location
+  update() {
+    // Update velocity
+    this.velocity.add(this.acceleration);
+    // Limit speed
+    this.velocity.limit(this.maxspeed);
+    this.position.add(this.velocity);
+    // Reset accelertion to 0 each cycle
+    this.acceleration.mult(0);
+  }
+  
+  boundaries() {
+
+    let desired = null;
+    if (mouseIsPressed && mouseX<b || mouseIsPressed && mouseX>width-b) {
+      xB=-150;
+    } else {
+      xB = 12;}
+    
+    if (this.position.x < xB) {
+      desired = createVector(this.maxspeed, this.velocity.y);
+    } else if (this.position.x > width - xB) {
+      desired = createVector(-this.maxspeed, this.velocity.y);
+    }
+    
+    if (mouseIsPressed && mouseY<b || mouseIsPressed && mouseY>height-b) {
+      yB=-150;
+    } else {
+      yB = 12;}
+
+    if (this.position.y < yB) {
+      desired = createVector(this.velocity.x, this.maxspeed);
+    } else if (this.position.y > height - yB) {
+      desired = createVector(this.velocity.x, -this.maxspeed);
+    }
+
+    if (desired !== null) {
+      desired.normalize();
+      desired.mult(this.maxspeed);
+      let steer = p5.Vector.sub(desired, this.velocity);
+      steer.limit(this.maxforce);
+      this.applyForce(steer);
+    }
+ }
+
+  display() {
+    fill(127);
+    stroke(200);
+    strokeWeight(2);
+    push();
+    translate(this.position.x, this.position.y);
+    ellipse(0, 0, this.r, this.r);
+    pop();
+  }
+}
