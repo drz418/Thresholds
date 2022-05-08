@@ -1,0 +1,58 @@
+//based on example code from Technical Team, REES52
+
+#include <Servo.h>     // Library for Servo Motor
+
+int ldrpin= 4;// initialize analog pin 0, connected with photovaristor
+int val=0;// initialize variable val
+int pos = 0;
+
+Servo myservo;   // define servo name
+
+void setup() {
+analogReference(EXTERNAL); // referencing battery power? 
+
+Serial.begin(9600);   // set baud rate at “9600”
+myservo.attach(12);   // servo pin - digital pin 12
+myservo.write(0);     // servo start position
+}
+
+void loop() {
+
+val=analogRead(ldrpin);// read the analog value of the sensor and assign it to val
+
+//Serial.println(val);// display the value of val
+/*
+for (pos = 0; pos <= 110; pos += 1) { // goes from 0 degrees to 180 degrees
+    // in steps of 1 degree
+    myservo.write(pos);              // tell servo to go to position in variable 'pos'
+    delay(15);                       // waits 15 ms for the servo to reach the position
+  }
+  for (pos = 180; pos >= 0; pos -= 1) { // goes from 180 degrees to 0 degrees
+    myservo.write(pos);              // tell servo to go to position in variable 'pos'
+    delay(15); 
+  }
+ */ 
+myservo.write(20);
+
+//delay(15);// wait for 0.015
+/*
+// incoming value from LDR dependant ambient light (around 500 right now), totally obscured at around 710
+ if(val>550) {
+ myservo.write(0); 
+}
+else {
+   myservo.write(50);
+  }
+  
+
+  for (pos = 0; pos <= 180; pos += 1) { // goes from 0 degrees to 180 degrees
+    // in steps of 1 degree
+    myservo.write(pos);              // tell servo to go to position in variable 'pos'
+    delay(30);                       // waits 15 ms for the servo to reach the position
+  }
+  for (pos = 180; pos >= 0; pos -= 1) { // goes from 180 degrees to 0 degrees
+    myservo.write(pos);              // tell servo to go to position in variable 'pos'
+    delay(30);                       // waits 15 ms for the servo to reach the position
+  }
+
+*/
